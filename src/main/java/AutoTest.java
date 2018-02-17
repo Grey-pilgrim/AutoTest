@@ -18,9 +18,6 @@ public class AutoTest {
     private final static WebDriverWait WAIT;
     private Map<String, String> locators;
 
-    /*
-     * Инициализация драйвера
-     */
     static {
         System.setProperty("webdriver.chrome.driver", "drv/chromedriver.exe");
         DRIVER = new ChromeDriver();
@@ -42,38 +39,25 @@ public class AutoTest {
     }
 
     @Test()
-    public void testSberbank() {
+    public void testAuto() {
 
-        // 1. Перейти на страницу "https://www.sberbank.ru/ru/person"
         goToPage(URL);
 
-        // 2. Нажать на - Застраховать себя и имущество
         clickOn("Застраховать себя  и имущество");
 
-
-        // 3. Выбрать - Страхование путешественников
         choose("Страхование путешественников");
 
-        // 4. Проверить наличие на странице заголовка - Страхование путешественников
         checkTitleOnPage("Страхование путешественников");
 
-        // 5. Нажать на - Оформить онлайн
         clickOn("Оформить онлайн");
 
-        // Нажать на баннер
         clickOnBanner("zashita-traveler.jpg");
 
-        // Переключиться на вкладку
         switchToTab();
 
-        // 6. Нажать на - Минимальная
         clickOn("Минимальная");
 
-        // 7. Нажать на - Оформить
         clickOn("Оформить");
-
-        // 8. Заполнить поля
-        // В секции заполнить поля
 
         inSectionFillFields("Страхователь", new HashMap<String, String>() {{
                                                         put("Фамилия", "Иванов");
@@ -97,7 +81,6 @@ public class AutoTest {
                                                     }}
         );
 
-        // 9. Проверить заполнение полей в секции.
         checkFillingOfFieldsInSection("Страхователь", new HashMap<String, String>() {{
                                                         put("Фамилия", "Иванов");
                                                         put("Отчество", "Иванович");
@@ -120,65 +103,38 @@ public class AutoTest {
                                                     }}
         );
 
-        // 10. Нажать на - Продолжить
         clickOn("Продолжить");
 
-        // 11. Проверить сообщение об ошибке - Заполнены не все обязательные поля
         checkErrorMessage("Заполнены не все обязательные поля");
 
-        // Закрыть вкладку.
         closeTab();
     }
 
-    /**
-     * Закрыть вкладку.
-     */
     private void closeTab() {
         DRIVER.close();
     }
 
-    /**
-     * Проверить сообщение об ошибке.
-     * @param message Сообщение.
-     */
     private void checkErrorMessage(String message) {
         textOrImage.apply("//div[contains(@class, 'error-message')]//div[contains(text(), '" + message + "')]");
     }
 
-    /**
-     * Проверить заполнение полей в секции.
-     * @param section Название секции.
-     * @param fieldsAndValues Поля и значения.
-     */
     private void checkFillingOfFieldsInSection(String section, Map<String, String> fieldsAndValues) {
         workingWithFields(section, fieldsAndValues, Action.CHECK_VALUE);
     }
 
-    /**
-     * В секции заполнить поля.
-     * @param section Название секции.
-     * @param fieldsAndValues Поля и значения, которыми мы их заполняем.
-     */
     private void inSectionFillFields(String section, Map<String, String> fieldsAndValues) {
         workingWithFields(section, fieldsAndValues, Action.INPUT_VALUE);
     }
 
-    /**
-     * Действие.
-     */
     enum Action {
-        /**
-         * Проверка.
-         */
+
         CHECK_VALUE {
             @Override
             void toDo(WebElement field, String value) {
                 assertTrue("Ошибка заполнения поля",
                         field.getAttribute("value").equalsIgnoreCase(value));
             }},
-        /**
-         * Ввод.
-         */
+
         INPUT_VALUE {
             @Override
             void toDo(WebElement field, String value) {
@@ -188,12 +144,6 @@ public class AutoTest {
         abstract void toDo(WebElement field, String value);
     }
 
-    /**
-     * Работать с полями.
-     * @param section Секция.
-     * @param fieldsAndValues Поля и Значения.
-     * @param action Действие.
-     */
     private void workingWithFields(String section, Map<String, String> fieldsAndValues, Action action) {
         WebElement root = textOrImage.apply("//h3[contains(text(), '" + section + "')]/parent::section[1]");
 
@@ -210,64 +160,35 @@ public class AutoTest {
         }
     }
 
-    /**
-     * Переключиться на вкладку.
-     */
     private void switchToTab() {
         List<String> tabs = new ArrayList<>(DRIVER.getWindowHandles());
         tabs.remove(DRIVER.getWindowHandle());
         DRIVER.switchTo().window(tabs.get(0));
     }
 
-    /**
-     * Нажать на баннер.
-     * @param banner Баннер.
-     */
     private void clickOnBanner(String banner) {
         textOrImage.apply(".//img[contains(@src, '" + banner + "')]").click();
     }
 
-    /**
-     * Проверить заголовок на странице.
-     * @param title Заголовок.
-     */
     private void checkTitleOnPage(String title) {
         textOrImage.apply("//h1[contains(text(), '" + title + "')]");
     }
 
-    /**
-     * Перейти на страницу.
-     * @param url URL-адрес.
-     */
     private void goToPage(String url) {
         DRIVER.get(url);
     }
 
-    /**
-     * Выбрать.
-     * @param name Название.
-     */
     private void choose(String name) {
         clickOn(name);
     }
 
-    /**
-     * Нажать на.
-     * @param name Название.
-     */
     private void clickOn(String name) {
         buttonOrLink.apply(".//*[contains(@aria-label, '" + name + "') or contains(text(), '" + name + "')]").click();
     }
 
-    /**
-     * Кнопка / ссылка
-     */
     private Function<String, WebElement> buttonOrLink =
             locator -> WAIT.until(ExpectedConditions.elementToBeClickable(By.xpath(locator)));
 
-    /**
-     * Текст / картинка
-     */
     private Function<String, WebElement> textOrImage =
             locator -> WAIT.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
 }
